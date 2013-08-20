@@ -39,12 +39,16 @@
   (.remove (.-classList el) class))
 
 (defn add-div
-  [el val class]
+  [el val id class]
   (let [div (.createElement  js/document "div")
         txt (.createTextNode js/document val)]
-    (.add (.-classList div) class)
+    (when-not (nil? id)
+      (aset div "id" id))
+    (when-not (nil? class)
+      (.add (.-classList div) class))
     (.appendChild div txt)
-    (.appendChild el div)))
+    (.appendChild el div)
+    div))
 
 (defn event-chan
   ([type] (event-chan js/window type))
@@ -63,13 +67,14 @@
 (def mc    (:chan (event-chan cells-div "mousemove")))
 (def mover (:chan (event-chan cells-div "mouseover")))
 (def mout  (:chan (event-chan cells-div "mouseout")))
-(def kc    (:chan (event-chan js/window "keyup")))
+(def kc    (:chan (event-chan "keyup")))
 
 (defn mouse-over
   [e]
   (do
     (set-html loc-div "mouseover")
-    (add-class (.-target e) "mover")))
+    (when (.contains (.-classList (.-target e)) "cell")
+      (add-class (.-target e) "mover"))))
 
 (defn mouse-out
   [e]
@@ -83,13 +88,29 @@
   (match [e]
          [{"type" "mouseover"}] (mouse-over e)
          [{"type" "mouseout"}]  (mouse-out e)
-         [{"x" x "y" y}]    (set-html loc-div (str x ", " y))
-         [{"keyCode" code}] (set-html key-div code)
+         [{"x" x "y" y}]        (set-html loc-div (str x ", " y))
+         [{"keyCode" code}]     (set-html key-div code)
          :else nil))
 
+;; (doall
+;;  (for [row (range 1 21)]
+;;    (let [div (add-div cells-div "" nil "row")]
+;;      (add-div div "{name}" nil "name")
+;;      (doall
+;;       (for [i (range 1 8)]
+;;         (add-div div i (str row i) "cell"))))))
+
+(def data
+  [["Bill" "1" "2" "3" "4" "5" "6" "7"]
+   ["Ben" "Sick" "Holiday" "Training" "" "000666" "6" "7"]])
+
 (doall
- (for [i (range 1 8)]
-   (add-div cells-div i "cells")))
+ (for [row data]
+   (let [div (add-div cells-div "" nil "row")]
+     (add-div div (first row) nil "name")
+     (doall
+      (for [x (rest row)]
+        (add-div div x (str row x) "cell"))))))
 
 (go
  (while true
