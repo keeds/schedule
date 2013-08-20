@@ -22,17 +22,13 @@
   [id]
   (.getElementById js/document id))
 
+(defn by-tag-name
+  [el tag]
+  (.getElementsByTagName el tag))
+
 (defn set-html
   [el s]
   (aset el "innerHTML" s))
-
-(defn set-class
-  [el name]
-  (set! (.-className el) name))
-
-(defn clear-class
-  [el]
-  (set! (.-className el) ""))
 
 (defn add-class
   [el class]
@@ -42,9 +38,13 @@
   [el class]
   (.remove (.-classList el) class))
 
-(defn by-tag-name
-  [el tag]
-  (.getElementsByTagName el tag))
+(defn add-div
+  [el val class]
+  (let [div (.createElement  js/document "div")
+        txt (.createTextNode js/document val)]
+    (.add (.-classList div) class)
+    (.appendChild div txt)
+    (.appendChild el div)))
 
 (defn event-chan
   ([type] (event-chan js/window type))
@@ -60,10 +60,10 @@
 (def key-div   (by-id "key"))
 (def cells-div (by-id "cells"))
 
-(def mc (:chan (event-chan cells-div "mousemove")))
+(def mc    (:chan (event-chan cells-div "mousemove")))
 (def mover (:chan (event-chan cells-div "mouseover")))
-(def mout (:chan (event-chan cells-div "mouseout")))
-(def kc (:chan (event-chan js/window "keyup")))
+(def mout  (:chan (event-chan cells-div "mouseout")))
+(def kc    (:chan (event-chan js/window "keyup")))
 
 (defn mouse-over
   [e]
@@ -77,7 +77,6 @@
     (set-html loc-div "mouseout")
     (remove-class (.-target e) "mover")))
 
-
 (defn handler
   [[e c]]
   (log "handler" (type e) e)
@@ -87,16 +86,6 @@
          [{"x" x "y" y}]    (set-html loc-div (str x ", " y))
          [{"keyCode" code}] (set-html key-div code)
          :else nil))
-
-(def data [[1] [2] [3] [4] [5] [6] [7]])
-
-(defn add-div
-  [el val class]
-  (let [div (.createElement  js/document "div")
-        txt (.createTextNode js/document val)]
-    (.add (.-classList div) class)
-    (.appendChild div txt)
-    (.appendChild el div)))
 
 (doall
  (for [i (range 1 8)]
