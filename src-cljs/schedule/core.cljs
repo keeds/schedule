@@ -1,16 +1,11 @@
 (ns schedule.core
   (:refer-clojure :exclude [])
-  (:require [schedule.utils :refer [log
-                                    ;; by-id by-tag-name
-                                    ;; add-class remove-class
-                                    ;; add-class-in-class remove-class-in-class
-                                    add-div
-                                    event-chan]]
-            [clojure.string :refer [join]]
+  (:require [schedule.utils  :refer [log add-div event-chan]]
+            [clojure.string  :refer [join]]
             [cljs.core.async :refer [chan sliding-buffer put!]]
-            [dommy.utils :as utils]
-            [dommy.core  :refer [set-html!]]
-            [dommy.attrs :refer [has-class? add-class! remove-class!]])
+            [dommy.utils     :as utils]
+            [dommy.core      :refer [set-html!]]
+            [dommy.attrs     :refer [has-class? add-class! remove-class!]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alts!]]
                    [clojure.core.match.js :refer [match]]
                    [dommy.macros :refer [sel sel1 node deftemplate]]))
