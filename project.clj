@@ -12,9 +12,8 @@
   :cljsbuild {
               :builds [{:source-paths ["src-cljs"]
                         :compiler {:output-to     "schedule.js"
-                                   :optimizations :simple
+                                   :optimizations :advanced
                                    :pretty-print  true}}]}
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"]]
                    :plugins [[lein-cljsbuild "0.3.2"]
-                             [com.cemerick/austin "0.1.1-SNAPSHOT"]]}}
-)
+                             [com.cemerick/austin "0.1.1-SNAPSHOT"]]}})
