@@ -1,19 +1,24 @@
 (ns schedule.core
   (:refer-clojure :exclude [])
-  (:require [schedule.utils :refer [log by-id by-tag-name set-html
-                                    add-class remove-class
-                                    add-class-in-class remove-class-in-class
+  (:require [schedule.utils :refer [log
+                                    ;; by-id by-tag-name
+                                    ;; add-class remove-class
+                                    ;; add-class-in-class remove-class-in-class
                                     add-div
                                     event-chan]]
             [clojure.string :refer [join]]
-            [cljs.core.async :refer [chan sliding-buffer put!]])
+            [cljs.core.async :refer [chan sliding-buffer put!]]
+            [dommy.utils :as utils]
+            [dommy.core  :refer [set-html!]]
+            [dommy.attrs :refer [has-class? add-class! remove-class!]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alts!]]
-                   [clojure.core.match.js :refer [match]]))
+                   [clojure.core.match.js :refer [match]]
+                   [dommy.macros :refer [sel sel1 node deftemplate]]))
 
 
-(def loc-div   (by-id "location"))
-(def key-div   (by-id "key"))
-(def cells-div (by-id "cells"))
+(def loc-div   (sel1 :#location))
+(def key-div   (sel1 :#key))
+(def cells-div (sel1 :#cells))
 
 (def mc    (:chan (event-chan cells-div "mousemove")))
 (def mover (:chan (event-chan cells-div "mouseover")))
@@ -22,13 +27,17 @@
 
 (defn mouse-over
   [el]
-  (set-html loc-div "mouseover")
-  (add-class-in-class (.-target el) "mover" "cell"))
+  (let [target (.-target el)]
+    (set-html! loc-div "mouseover")
+    (when (has-class? target "cell")
+      (add-class! target "mover"))))
 
 (defn mouse-out
   [el]
-  (set-html loc-div "mouseout")
-  (remove-class-in-class (.-target el) "mover" "cell"))
+  (let [target (.-target el)]
+    (set-html! loc-div "mouseout")
+    (when (has-class? target "cell")
+      (remove-class! target "mover"))))
 
 (defn handler
   [[e c]]
@@ -36,8 +45,8 @@
   (match [e]
          [{"type" "mouseover"}] (mouse-over e)
          [{"type" "mouseout"}]  (mouse-out e)
-         [{"x" x "y" y}]        (set-html loc-div (str x ", " y))
-         [{"keyCode" code}]     (set-html key-div code)
+         [{"x" x "y" y}]        (set-html! loc-div (str x ", " y))
+         [{"keyCode" code}]     (set-html! key-div code)
          :else nil))
 
 (def data
