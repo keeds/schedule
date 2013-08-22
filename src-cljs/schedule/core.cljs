@@ -5,12 +5,14 @@
             [cljs.core.async :refer [chan sliding-buffer put!]]
             [dommy.utils     :as utils]
             [dommy.core      :refer [set-html!]]
-            [dommy.attrs     :refer [has-class? add-class! remove-class!]])
+            [dommy.attrs     :refer [has-class? add-class! remove-class! attr set-attr!]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alts!]]
                    [clojure.core.match.js :refer [match]]
                    [dommy.macros :refer [sel sel1 node deftemplate]]))
 
+(def loc (atom {:x 0 :y 0}))
 
+(def pos-div   (sel1 :#pos))
 (def loc-div   (sel1 :#location))
 (def key-div   (sel1 :#key))
 (def cells-div (sel1 :#cells))
@@ -23,6 +25,7 @@
 (defn mouse-over
   [el]
   (let [target (.-target el)]
+    (set-html! pos-div (join ", " (vector (attr target :x) (attr target :y))))
     (set-html! loc-div "mouseover")
     (when (has-class? target "cell")
       (add-class! target "mover"))))
@@ -49,13 +52,12 @@
    ["Ben" "Sick" "Holiday" "Training" "" "000666" "6" "7"]
    ["Bob" "1" "2" "a" "A" "" "" ""]])
 
-(doall
- (for [row data]
-   (let [div (add-div cells-div "" nil "row")]
-     (add-div div (first row) nil "name")
-     (doall
-      (for [x (rest row)]
-        (add-div div x nil "cell"))))))
+(doseq [[x row] (map-indexed vector data)]
+  (let [div (add-div cells-div "" nil "row")]
+    (add-div div (first row) nil "name")
+    (doseq [[y cell] (map-indexed vector (rest row))]
+      (-> (add-div div cell (str x ":" y) "cell")
+          (set-attr! :x x :y y)))))
 
 (go
  (while true
