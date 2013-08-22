@@ -17,6 +17,12 @@
 (def key-div   (sel1 :#key))
 (def cells-div (sel1 :#cells))
 
+(defn pos-watcher
+  [_ _ _ new]
+  (set-html! pos-div (join ", " (vector (:x new) (:y new)))))
+
+(add-watch loc nil pos-watcher)
+
 (def mc    (:chan (event-chan cells-div "mousemove")))
 (def mover (:chan (event-chan cells-div "mouseover")))
 (def mout  (:chan (event-chan cells-div "mouseout")))
@@ -25,7 +31,7 @@
 (defn mouse-over
   [el]
   (let [target (.-target el)]
-    (set-html! pos-div (join ", " (vector (attr target :x) (attr target :y))))
+    (swap! loc assoc :x (attr target :x) :y (attr target :y))
     (set-html! loc-div "mouseover")
     (when (has-class? target "cell")
       (add-class! target "mover"))))
@@ -39,7 +45,6 @@
 
 (defn handler
   [[e c]]
-  ;; (log "handler" (type e) e)
   (match [e]
          [{"type" "mouseover"}] (mouse-over e)
          [{"type" "mouseout"}]  (mouse-out e)
@@ -48,9 +53,9 @@
          :else nil))
 
 (def data
-  [["Bill" "1" "2" "3" "4" "5" "6" "7"]
-   ["Ben" "Sick" "Holiday" "Training" "" "000666" "6" "7"]
-   ["Bob" "1" "2" "a" "A" "" "" ""]])
+  [["Bill" "001234" "000022" "" "" "" "" ""]
+   ["Ben" "Sick" "Holiday" "Training" "" "000666" "" ""]
+   ["Bob" "" "" "" "" "" "" ""]])
 
 (doseq [[x row] (map-indexed vector data)]
   (let [div (add-div cells-div "" nil "row")]
