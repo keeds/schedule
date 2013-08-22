@@ -1,6 +1,7 @@
 (ns schedule.core
   (:refer-clojure :exclude [])
-  (:require [schedule.utils  :refer [log add-div event-chan]]
+  (:require [schedule.utils  :refer [log by-id add-class remove-class
+                                     add-div event-chan]]
             [clojure.string  :refer [join]]
             [cljs.core.async :refer [chan sliding-buffer put!]]
             [dommy.utils     :as utils]
@@ -10,6 +11,15 @@
                    [clojure.core.match.js :refer [match]]
                    [dommy.macros :refer [sel sel1 node deftemplate]]))
 
+(def keyup     38)
+(def keydown   40)
+(def keyright  39)
+(def keyleft   37)
+(def key-s     83)
+(def key-h     72)
+(def key-t     84)
+(def key-space 32)
+
 (def loc (atom {:x 0 :y 0}))
 
 (def pos-div   (sel1 :#pos))
@@ -17,9 +27,20 @@
 (def key-div   (sel1 :#key))
 (def cells-div (sel1 :#cells))
 
+(defn cell-id
+  [{:keys [x y] :as cell}]
+  (when cell
+    (str x ":" y)))
+
 (defn pos-watcher
-  [_ _ _ new]
-  (set-html! pos-div (join ", " (vector (:x new) (:y new)))))
+  [_ _ old new]
+  (set-html! pos-div (join ", " (vector (:x new) (:y new))))
+  (let [old-el (by-id (cell-id old))
+        new-el (by-id (cell-id new))]
+    (when old-el
+      (remove-class old-el "mover"))
+    (when new-el
+      (add-class new-el "mover"))))
 
 (add-watch loc nil pos-watcher)
 
@@ -31,7 +52,7 @@
 (defn mouse-over
   [el]
   (let [target (.-target el)]
-    (swap! loc assoc :x (attr target :x) :y (attr target :y))
+    (swap! loc assoc :x (int (attr target :x)) :y (int (attr target :y)))
     (set-html! loc-div "mouseover")
     (when (has-class? target "cell")
       (add-class! target "mover"))))
@@ -43,13 +64,32 @@
     (when (has-class? target "cell")
       (remove-class! target "mover"))))
 
+(defn key-handler
+  [key]
+  (log key (type key))
+  (cond
+   (= key keydown)  (swap! loc assoc :x (inc (:x @loc)))
+   (= key keyup)    (swap! loc assoc :x (dec (:x @loc)))
+   (= key keyright) (swap! loc assoc :y (inc (:y @loc)))
+   (= key keyleft)  (swap! loc assoc :y (dec (:y @loc)))
+   :else (let [id   (cell-id @loc)
+               cell (by-id id)]
+           (cond
+            (= key key-s)     (set-html! cell "Sick")
+            (= key key-h)     (set-html! cell "Holiday")
+            (= key key-t)     (set-html! cell "Training")
+            (= key key-space) (set-html! cell "")))))
+
 (defn handler
   [[e c]]
   (match [e]
          [{"type" "mouseover"}] (mouse-over e)
          [{"type" "mouseout"}]  (mouse-out e)
          [{"x" x "y" y}]        (set-html! loc-div (str x ", " y))
-         [{"keyCode" code}]     (set-html! key-div code)
+         [{"keyCode" code}]     (do
+                                  (set-html! key-div code)
+                                  (key-handler code))
+         ;; (set-html! key-div code)
          :else nil))
 
 (def data
