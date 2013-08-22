@@ -3,7 +3,9 @@ a    { text-decoration:none; }
 div  { display: block; }
 
 .row   { min-width:100%; }
-.name  { display:inline-block; min-width:115px; min-height:24px; text-align:left; font-size:20px; position:relative; }
+.name  { display:inline-block; min-width:115px; min-height:24px; vertical-align:bottom; text-align:left;
+	 font-size:20px; position:relative; border-radius:1px;
+	 padding: 2px;}
 .cell  { display:inline-block; min-width:115px; min-height:24px; vertical-align:bottom; text-align:center;
 	 font-size:20px; position:relative; border-radius:1px;
 	 padding: 2px; margin-right:2px; margin-top:2px; margin-left:2px; margin-bottom:2px; }
