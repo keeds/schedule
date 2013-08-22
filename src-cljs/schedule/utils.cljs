@@ -69,16 +69,3 @@
   [el class in-class]
   (when (.contains (.-classList el) in-class)
     (remove-class el class)))
-
-;; (defn mouse-over
-;;   [e]
-;;   (do
-;;     (set-html loc-div "mouseover")
-;;     (when (.contains (.-classList (.-target e)) "cell")
-;;       (add-class (.-target e) "mover"))))
-
-;; (defn mouse-out
-;;   [e]
-;;   (do
-;;     (set-html loc-div "mouseout")
-;;     (remove-class (.-target e) "mover")))
