@@ -20,7 +20,14 @@
 (def key-t     84)
 (def key-space 32)
 
-(def loc (atom {:x 0 :y 0}))
+(defn loc-validator
+  [new]
+  (log new)
+  (when-not (or (< (:x new) 0)
+                (< (:y new) 0))
+    true))
+
+(def loc (atom {:x 0 :y 0} :validator loc-validator))
 
 (def pos-div   (sel1 :#pos))
 (def loc-div   (sel1 :#location))
@@ -64,18 +71,21 @@
 (defn key-handler
   [key]
   ;; (log key (type key))
-  (cond
-   (= key keydown)  (swap! loc assoc :x (inc (:x @loc)))
-   (= key keyup)    (swap! loc assoc :x (dec (:x @loc)))
-   (= key keyright) (swap! loc assoc :y (inc (:y @loc)))
-   (= key keyleft)  (swap! loc assoc :y (dec (:y @loc)))
-   :else (let [id   (cell-id @loc)
-               cell (by-id id)]
-           (cond
-            (= key key-s)     (set-html! cell "Sick")
-            (= key key-h)     (set-html! cell "Holiday")
-            (= key key-t)     (set-html! cell "Training")
-            (= key key-space) (set-html! cell "")))))
+  (try
+    (cond
+     (= key keydown)  (swap! loc assoc :x (inc (:x @loc)))
+     (= key keyup)    (swap! loc assoc :x (dec (:x @loc)))
+     (= key keyright) (swap! loc assoc :y (inc (:y @loc)))
+     (= key keyleft)  (swap! loc assoc :y (dec (:y @loc)))
+     :else (let [id   (cell-id @loc)
+                 cell (by-id id)]
+             (cond
+              (= key key-s)     (set-html! cell "Sick")
+              (= key key-h)     (set-html! cell "Holiday")
+              (= key key-t)     (set-html! cell "Training")
+              (= key key-space) (set-html! cell ""))))
+    (catch js/Object _
+      nil)))
 
 (defn handler
   [[e c]]
@@ -103,3 +113,5 @@
 (go
  (while true
    (handler (alts! [mover mout mc kc]))))
+
+(swap! loc assoc :x 0 :y 0)
