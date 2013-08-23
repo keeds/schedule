@@ -51,22 +51,19 @@
 
 (defn mouse-over
   [el]
-  (let [target (.-target el)]
-    (swap! loc assoc :x (int (attr target :x)) :y (int (attr target :y)))
-    (set-html! loc-div "mouseover")
+  (when-let [target (.-target el)]
     (when (has-class? target "cell")
-      (add-class! target "mover"))))
+      (swap! loc assoc :x (int (attr target :x)) :y (int (attr target :y)))
+      (set-html! loc-div "mouseover"))))
 
 (defn mouse-out
   [el]
   (let [target (.-target el)]
-    (set-html! loc-div "mouseout")
-    (when (has-class? target "cell")
-      (remove-class! target "mover"))))
+    (set-html! loc-div "mouseout")))
 
 (defn key-handler
   [key]
-  (log key (type key))
+  ;; (log key (type key))
   (cond
    (= key keydown)  (swap! loc assoc :x (inc (:x @loc)))
    (= key keyup)    (swap! loc assoc :x (dec (:x @loc)))
@@ -89,7 +86,6 @@
          [{"keyCode" code}]     (do
                                   (set-html! key-div code)
                                   (key-handler code))
-         ;; (set-html! key-div code)
          :else nil))
 
 (def data
