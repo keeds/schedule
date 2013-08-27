@@ -7,8 +7,8 @@
                  [org.clojure/clojurescript "0.0-1859"]
                  [org.clojure/core.async "0.1.0-SNAPSHOT"]
                  [org.clojure/core.match "0.2.0-rc2"]
-                 ;; [com.cemerick/austin "0.1.1-SNAPSHOT"]
-                 [prismatic/dommy "0.1.1"]]
+                 [prismatic/dommy "0.1.1"]
+                 [com.keminglabs/reflex "0.1.1"]]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
   :cljsbuild {
               :builds [{:source-paths ["src-cljs"]
