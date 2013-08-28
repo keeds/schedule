@@ -1,6 +1,6 @@
 (ns schedule.core
   (:refer-clojure :exclude [])
-  (:require [schedule.utils  :refer [log by-id add-class remove-class
+  (:require [schedule.utils  :refer [log by-id add-class remove-class set-html
                                      add-div event-chan]]
             [clojure.string  :refer [join]]
             [cljs.core.async :refer [chan sliding-buffer put!]]
@@ -26,15 +26,14 @@
 (def max-loc (atom {:x 0 :y 0}))
 
 (defn loc-validator
-  [new]
-  (log new @max-loc)
+  [{:keys [x y] :as new}]
+  (log "new:" new "max:" @max-loc)
   (cond
-   (nil? new) true
-   (or (< (:x new) 0)
-       (< (:y new) 0)
-       ;; (>= (:x new) (:max-x @max-loc))
-       ;; (>= (:y new) (:max-y @max-loc))
-       ) false
+   (and (== x 0) (== y 0)) true
+   (or ( < x 0)
+       ( < y 0)
+       (>= x (:x @max-loc))
+       (>= y (:y @max-loc))) false
    :else true))
 
 (def loc     (atom {:x 0 :y 0} :validator loc-validator))
@@ -63,13 +62,13 @@
 (defn data-watcher
   [_ _ old new]
   (log "data-watcher:" old new)
-  (when new
-    (doseq [[x row] (map-indexed vector new)]
-      (let [div (add-div cells-div "" nil "row")]
-        (add-div div (first row) nil "name")
-        (doseq [[y cell] (map-indexed vector (rest row))]
-          (-> (add-div div cell (str x ":" y) "cell")
-              (set-attr! :x x :y y)))))))
+  (set-html cells-div "")
+  (doseq [[x row] (map-indexed vector new)]
+    (let [div (add-div cells-div "" nil "row")]
+      (add-div div (first row) nil "name")
+      (doseq [[y cell] (map-indexed vector (rest row))]
+        (-> (add-div div cell (str x ":" y) "cell")
+            (set-attr! :x x :y y))))))
 
 (add-watch  loc nil loc-watcher)
 (add-watch data nil data-watcher)
@@ -123,18 +122,6 @@
                                   (key-handler code))
          :else nil))
 
-;; (def data
-;;   [["Bill" "001234" "000022" "" "" "" "" ""]
-;;    ["Ben" "Sick" "Holiday" "Training" "" "000666" "" ""]
-;;    ["Bob" "" "" "" "" "" "" ""]])
-
-;; (doseq [[x row] (map-indexed vector data)]
-;;   (let [div (add-div cells-div "" nil "row")]
-;;     (add-div div (first row) nil "name")
-;;     (doseq [[y cell] (map-indexed vector (rest row))]
-;;       (-> (add-div div cell (str x ":" y) "cell")
-;;           (set-attr! :x x :y y)))))
-
 (go
  (while true
    (handler (alts! [mover mout mc kc]))))
@@ -142,19 +129,30 @@
 ;; set state data
 (defn set-state!
   [_data]
-  (log "set-state")
-  (reset! data _data)
-  (swap! loc assoc :x 0 :y 0)
-  (log @max-loc)
-  (if (nil? _data)
-       (swap! max-loc assoc :x 0 :y 0)
-       (swap! max-loc assoc :x (count _data) :y (- (count (first _data)) 1)))
-  (log @max-loc))
+  (do
+    (log "set-state:" _data)
+
+    (log "swapping loc")
+    (swap! loc assoc :x 0 :y 0)
+
+    (log "resetting data")
+    (reset! data _data)
+    (log @max-loc)
+    (if (nil? _data)
+      (swap! max-loc assoc :x 0 :y 0)
+      (swap! max-loc assoc :x (count _data) :y (- (count (first _data)) 1)))
+    (log @max-loc)
+    (swap! loc assoc :x 0 :y 0)))
 
 (set-state!
  [["Bill" "001234" "000022" "" "" "" "" ""]
   ["Ben" "Sick" "Holiday" "Training" "" "000666" "" ""]
   ["Bob" "" "" "" "" "" "" ""]])
 
-;; (set-state!
-;;  nil)
+(set-state!
+ nil)
+
+(set-state!
+ [["Bill" "001234" "000022" "" "" "" "" ""]
+  ["Ben" "Sick" "Holiday" "Training" "" "000666" "" ""]
+  ["Bob" "" "" "" "" "" "" ""]])
