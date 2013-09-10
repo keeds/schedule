@@ -6,9 +6,10 @@
             [cljs.core.async :refer [chan sliding-buffer put!]]
             [dommy.utils     :as utils]
             [dommy.core      :refer [set-html!]]
-            [dommy.attrs     :refer [has-class? add-class! remove-class! attr set-attr!]])
+            [dommy.attrs     :refer [has-class? add-class! remove-class! attr set-attr!]]
+            [cljs.core.match])
   (:require-macros [cljs.core.async.macros :as m :refer [go alts!]]
-                   [clojure.core.match.js        :refer [match]]
+                   [cljs.core.match.macros       :refer [match]]
                    [dommy.macros                 :refer [sel sel1 node deftemplate]]
                    [reflex.macros                :refer [computed-observable]]))
 

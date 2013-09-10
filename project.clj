@@ -6,8 +6,8 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-1859"]
                  [org.clojure/core.async "0.1.0-SNAPSHOT"]
-                 [org.clojure/core.match "0.2.0-rc2"]
-                 [prismatic/dommy "0.1.1"]
+                 [org.clojure/core.match "0.2.0-rc5"]
+                 [prismatic/dommy "0.1.2"]
                  [com.keminglabs/reflex "0.1.1"]]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
   :cljsbuild {
@@ -16,5 +16,5 @@
                                    :optimizations :whitespace
                                    :pretty-print  true}}]}
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"]]
-                   :plugins [[lein-cljsbuild "0.3.2"]
+                   :plugins [[lein-cljsbuild "0.3.3-SNAPSHOT"]
                              [com.cemerick/austin "0.1.1"]]}})

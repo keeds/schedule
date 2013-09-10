@@ -1,9 +1,7 @@
 (ns schedule.utils
   (:refer-clojure :exclude [])
   (:require [clojure.string :refer [join]]
-            [cljs.core.async :refer [chan sliding-buffer put!]])
-  (:require-macros [cljs.core.async.macros :as m :refer [go alts!]]
-                   [clojure.core.match.js :refer [match]]))
+            [cljs.core.async :refer [chan sliding-buffer put!]]))
 
 (extend-type object
   ILookup
