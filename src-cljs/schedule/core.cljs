@@ -28,7 +28,7 @@
 
 (defn loc-validator
   [{:keys [x y] :as new}]
-  (log "new:" new "max:" @max-loc)
+  ;; (log "new:" new "max:" @max-loc)
   (cond
    (and (== x 0) (== y 0)) true
    (or ( < x 0)
@@ -62,7 +62,7 @@
 
 (defn data-watcher
   [_ _ old new]
-  (log "data-watcher:" old new)
+  ;; (log "data-watcher:" old new)
   (set-html cells-div "")
   (doseq [[x row] (map-indexed vector new)]
     (let [div (add-div cells-div "" nil "row")]
@@ -94,26 +94,27 @@
 
 (defn key-handler
   [key]
-  ;; (log key (type key))
-  (let [_loc @loc]
+  (log "key-handler:" key)
+  (let [_loc @loc
+        id   (cell-id _loc)
+        cell (by-id id)]
     (try
-      (cond
-       (= key keydown)  (swap! loc assoc :x (inc (:x _loc)))
-       (= key keyup)    (swap! loc assoc :x (dec (:x _loc)))
-       (= key keyright) (swap! loc assoc :y (inc (:y _loc)))
-       (= key keyleft)  (swap! loc assoc :y (dec (:y _loc)))
-       :else (let [id   (cell-id _loc)
-                   cell (by-id id)]
-               (cond
-                (= key key-s)     (set-html! cell "Sick")
-                (= key key-h)     (set-html! cell "Holiday")
-                (= key key-t)     (set-html! cell "Training")
-                (= key key-space) (set-html! cell ""))))
+      (match key
+             40    (swap! loc assoc :x (inc (:x _loc)))
+             38    (swap! loc assoc :x (dec (:x _loc)))
+             39    (swap! loc assoc :y (inc (:y _loc)))
+             37    (swap! loc assoc :y (dec (:y _loc)))
+             83    (set-html! cell "Sick")
+             72    (set-html! cell "Holiday")
+             84    (set-html! cell "Training")
+             32    (set-html! cell "")
+             :else nil)
       (catch js/Object _
         nil))))
 
 (defn handler
   [[e c]]
+  (log "handler" e c)
   (match [e]
          [{"type" "mouseover"}] (mouse-over e)
          [{"type" "mouseout"}]  (mouse-out e)
@@ -131,18 +132,11 @@
 (defn set-state!
   [_data]
   (do
-    (log "set-state:" _data)
-
-    (log "swapping loc")
     (swap! loc assoc :x 0 :y 0)
-
-    (log "resetting data")
     (reset! data _data)
-    (log @max-loc)
     (if (nil? _data)
       (swap! max-loc assoc :x 0 :y 0)
       (swap! max-loc assoc :x (count _data) :y (- (count (first _data)) 1)))
-    (log @max-loc)
     (swap! loc assoc :x 0 :y 0)))
 
 (set-state!
