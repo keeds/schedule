@@ -13,14 +13,6 @@
                    [dommy.macros                 :refer [sel sel1 node deftemplate]]
                    [reflex.macros                :refer [computed-observable]]))
 
-;; (def keyup     38)
-;; (def keydown   40)
-;; (def keyright  39)
-;; (def keyleft   37)
-;; (def key-s     83)
-;; (def key-h     72)
-;; (def key-t     84)
-;; (def key-space 32)
 
 ;; atoms
 (def max-loc (atom {:x 0 :y 0}))
